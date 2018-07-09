@@ -10,6 +10,10 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/ulule/limiter"
+	"github.com/ulule/limiter/drivers/middleware/stdlib"
+	"github.com/ulule/limiter/drivers/store/memory"
 )
 
 const (
@@ -34,11 +38,18 @@ func main() {
 		cards: cards,
 	}
 
-	r.POST("/create", ContextHandler{cc, create})
+	rate := limiter.Rate{
+		Period: 10 * time.Second,
+		Limit:  10,
+	}
+	store := memory.NewStore()
 
-	r.POST("/load", ContextHandler{cc, loadHandler})
+	middleware := stdlib.NewMiddleware(limiter.New(store, rate), stdlib.WithForwardHeader(true))
+	r.POST("/create", middleware.Handler(ContextHandler{cc, create}))
 
-	r.GET("/", ContextHandler{cc, getAllCardsHandler})
+	r.POST("/load", middleware.Handler(ContextHandler{cc, loadHandler}))
+
+	r.GET("/", middleware.Handler(ContextHandler{cc, getAllCardsHandler}))
 
 	// We can then pass our router (after declaring all our routes) to this method
 	// (where previously, we were leaving the secodn argument as nil)
