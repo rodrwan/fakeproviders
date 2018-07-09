@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  branch = "master"
-  name = "github.com/Finciero/httprouter"
-  packages = ["."]
-  revision = "ad4521a78e4608ff4d0df2f41355b5080f5cd23f"
-
-[[projects]]
   name = "github.com/julienschmidt/httprouter"
   packages = ["."]
   revision = "8c199fb6259ffc1af525cc3ad52ee60ba8359669"
@@ -16,6 +10,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "aa914dcc421aeec11eeb77b12ccf89842739bc9ecedc05d1294f3790e0b9b41b"
+  inputs-digest = "4368a84c877fb4752452ba91aaadffeab050a12dac9f66e08b2196102e7903f5"
   solver-name = "gps-cdcl"
   solver-version = 1

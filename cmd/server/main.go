@@ -10,8 +10,6 @@ import (
 	"math/rand"
 	"net/http"
 	"time"
-
-	"github.com/Finciero/httprouter"
 )
 
 const (
@@ -27,7 +25,7 @@ var (
 
 func main() {
 	flag.Parse()
-	r := httprouter.New()
+	r := NewRouter()
 
 	cards := make([]*card, 0)
 	// This is where the router is useful, it allows us to declare methods that

@@ -31,7 +31,7 @@
 //
 // As you can see just changes the signature of the method provided by httprouter, and
 // injects URI parameters in the request.Context.
-package httprouter
+package main
 
 import (
 	"net/http"
@@ -47,15 +47,14 @@ type Router struct {
 	httprouter.Router
 }
 
-// New returns a new initialized Router.
+// NewRouter returns a new initialized Router.
 // Path auto-correction, including trailing slashes, is enabled by default.
-func New() *Router {
+func NewRouter() *Router {
 	return &Router{
 		Router: httprouter.Router{
 			RedirectTrailingSlash:  true,
 			RedirectFixedPath:      true,
 			HandleMethodNotAllowed: true,
-			HandleOPTIONS:          true,
 		},
 	}
 }
