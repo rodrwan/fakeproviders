@@ -36,5 +36,5 @@
 [metadata.heroku]
   root-package = "github.com/rodrwan/fakeprovider"
   go-version = "go1.9.1"
-  install = [ ".", "./cmd/..." ]
+  install = [ ".", "./cmd/server/..." ]
   ensure = "true"
