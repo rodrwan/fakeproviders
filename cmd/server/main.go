@@ -40,7 +40,7 @@ func main() {
 
 	rate := limiter.Rate{
 		Period: 10 * time.Second,
-		Limit:  10,
+		Limit:  2,
 	}
 	store := memory.NewStore()
 
