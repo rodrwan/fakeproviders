@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	minCreateProcessTime = 1
-	maxCreateProcessTime = 2
+	minCreateProcessTime = 10
+	maxCreateProcessTime = 300
 	minLoadProcessTime   = 3
 	maxLoadProcessTime   = 10
 )
