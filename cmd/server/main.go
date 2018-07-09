@@ -2,12 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -20,7 +21,12 @@ const (
 	maxLoadProcessTime   = 10
 )
 
+var (
+	port = flag.String("port", "8080", "Service port")
+)
+
 func main() {
+	flag.Parse()
 	r := mux.NewRouter()
 
 	// This is where the router is useful, it allows us to declare methods that
@@ -30,8 +36,8 @@ func main() {
 
 	// We can then pass our router (after declaring all our routes) to this method
 	// (where previously, we were leaving the secodn argument as nil)
-	port := os.Getenv("PORT")
-	http.ListenAndServe(fmt.Sprintf(":%s", port), r)
+	log.Printf("sever running on %s", fmt.Sprintf(":%s", *port))
+	panic(http.ListenAndServe(fmt.Sprintf(":%s", *port), r))
 }
 
 type createRequestData struct {
