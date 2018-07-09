@@ -2,10 +2,12 @@ package main
 
 import "net/http"
 
+// Context context holds shared data between services and handlers
 type Context struct {
 	cards []*card
 }
 
+// ContextHandler join context with handler signature
 type ContextHandler struct {
 	ctx *Context
 	H   func(*Context, http.ResponseWriter, *http.Request) (*response, error)
