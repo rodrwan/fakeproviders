@@ -16,7 +16,7 @@ GET /
 
 #### Request
 
-```jsonld=
+```json
 {
   "first_name": "lala",
   "last_name": "lalo",
@@ -26,7 +26,7 @@ GET /
 
 #### Response
 
-```jsonld=
+```json
 {
   "data": {
     "name_on_card": "rodrigo fuenzalida",
@@ -43,7 +43,7 @@ GET /
 
 #### Request
 
-```jsonld=
+```json
 {
   "reference_id": "57248090",
   "amount": 100
@@ -52,7 +52,7 @@ GET /
 
 #### Response
 
-```jsonld=
+```json
 {
   "data": {
     "name_on_card": "rodrigo fuenzalida",
@@ -70,7 +70,7 @@ GET /
 
 #### Response
 
-```jsonld=
+```json
 {
   "data": [
     {
