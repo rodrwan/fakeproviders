@@ -34,7 +34,7 @@
   unused-packages = true
 
 [metadata.heroku]
-  root-package = "github.com/rodrwan/fakeprovider/cmd/server"
+  root-package = "fakeprovider"
   go-version = "go1.10.3"
   install = [ ".", "./cmd/..." ]
   ensure = "true"
