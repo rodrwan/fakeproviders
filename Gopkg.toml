@@ -32,3 +32,9 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+[metadata.heroku]
+  root-package = "github.com/rodrwan/fakeprovider"
+  go-version = "go1.10.3"
+  install = ["./cmd/..."]
+  ensure = "true"
