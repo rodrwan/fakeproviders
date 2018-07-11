@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/ulule/limiter"
 	"github.com/ulule/limiter/drivers/middleware/stdlib"
 	"github.com/ulule/limiter/drivers/store/memory"
@@ -50,6 +51,9 @@ func main() {
 	r.POST("/load", middleware.Handler(ContextHandler{cc, loadHandler}))
 
 	r.GET("/", middleware.Handler(ContextHandler{cc, getAllCardsHandler}))
+
+	auth := NewAuthMiddleware("development_token")
+	r.PATCH("/cards/:id/info", auth.Handle((middleware.Handler(ContextHandler{cc, getAllCardsHandler}))))
 
 	// We can then pass our router (after declaring all our routes) to this method
 	// (where previously, we were leaving the secodn argument as nil)
@@ -96,12 +100,15 @@ type user struct {
 }
 
 type card struct {
+	ID          string    `json:"id"`
 	NameOnCard  string    `json:"name_on_card"`
 	PAN         string    `json:"pan"`
 	ReferenceID string    `json:"reference_id"`
 	ExpDate     string    `json:"exp_date"`
+	CVV         string    `json:"cvv"`
 	Balance     int64     `json:"balance"`
 	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 func (c *card) SetNameOnCard(u *user) {
@@ -128,12 +135,14 @@ func (c *card) SetBalance(balance int64) {
 func newCard(u *user) *card {
 	c := &card{}
 
+	c.ID = newID()
 	c.SetNameOnCard(u)
 	c.SetPAN()
 	c.SetExpDate()
 	c.SetReferenceID()
 	c.SetBalance(0)
 	c.CreatedAt = time.Now()
+	c.UpdatedAt = time.Now()
 
 	processTime := randomProcessTime(minCreateProcessTime, maxCreateProcessTime) * time.Second
 	log.Printf("Waiting for %.2fs", processTime.Seconds())
@@ -167,4 +176,14 @@ func pickYear() string {
 		"19", "20", "21", "22", "23",
 	}
 	return years[rand.Intn(len(years))]
+}
+
+// newID creates a new UUID.
+func newID() string {
+	u2, err := uuid.NewRandom()
+	if err != nil {
+		fmt.Printf("Something went wrong: %s", err)
+		return ""
+	}
+	return u2.String()
 }
