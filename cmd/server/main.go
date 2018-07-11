@@ -53,11 +53,8 @@ func main() {
 	auth := NewAuthMiddleware(*token)
 
 	r.POST("/create", fakeLogger.Handle(middleware.Handler(ContextHandler{cc, create})))
-
 	r.POST("/load", fakeLogger.Handle(middleware.Handler(ContextHandler{cc, loadHandler})))
-
 	r.GET("/", fakeLogger.Handle(middleware.Handler(ContextHandler{cc, getAllCardsHandler})))
-
 	r.PATCH("/cards/:id/info", fakeLogger.Handle(auth.Handle((middleware.Handler(ContextHandler{cc, patch})))))
 
 	// We can then pass our router (after declaring all our routes) to this method
