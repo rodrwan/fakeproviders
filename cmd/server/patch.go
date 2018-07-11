@@ -22,31 +22,35 @@ func patch(ctx *Context, w http.ResponseWriter, r *http.Request) (*response, err
 	}
 	var patch patchRequestData
 
-	fmt.Println(id)
 	defer r.Body.Close()
 	if err := unmarshalJSON(r.Body, &patch); err != nil {
 		log.Println(fmt.Errorf("Error: %v", err))
 		return nil, err
 	}
 
-	var cc *card
+	var selectedCard *card
+	for _, card := range ctx.cards {
+		if card.ID == id {
+			card.PAN = patch.CardNumber
+			card.ExpDate = patch.ExpDate
+			card.CVV = patch.CVV
+			card.ReferenceID = patch.ReferenceID
+			card.UpdatedAt = time.Now()
 
-	for _, c := range ctx.cards {
-		if c.ID == id {
-			c.PAN = patch.CardNumber
-			c.ExpDate = patch.ExpDate
-			c.CVV = patch.CVV
-			c.ReferenceID = patch.ReferenceID
-			c.UpdatedAt = time.Now()
-
-			cc = c
+			selectedCard = card
 			break
 		}
 	}
 
+	if selectedCard == nil {
+		return &response{
+			Status: http.StatusNotFound,
+		}, nil
+	}
+
 	return &response{
 		Status: http.StatusOK,
-		Data:   cc,
+		Data:   selectedCard,
 	}, nil
 
 }
