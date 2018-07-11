@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/rodrwan/fakeprovider/logger"
 	"github.com/ulule/limiter"
 	"github.com/ulule/limiter/drivers/middleware/stdlib"
 	"github.com/ulule/limiter/drivers/store/memory"
@@ -46,15 +47,16 @@ func main() {
 	}
 	store := memory.NewStore()
 
+	fakeLogger := logger.NewLogger("fake provider")
 	middleware := stdlib.NewMiddleware(limiter.New(store, rate), stdlib.WithForwardHeader(true))
-	r.POST("/create", middleware.Handler(ContextHandler{cc, create}))
+	r.POST("/create", fakeLogger.Handle(middleware.Handler(ContextHandler{cc, create})))
 
-	r.POST("/load", middleware.Handler(ContextHandler{cc, loadHandler}))
+	r.POST("/load", fakeLogger.Handle(middleware.Handler(ContextHandler{cc, loadHandler})))
 
-	r.GET("/", middleware.Handler(ContextHandler{cc, getAllCardsHandler}))
+	r.GET("/", fakeLogger.Handle(middleware.Handler(ContextHandler{cc, getAllCardsHandler})))
 
 	auth := NewAuthMiddleware("development_token")
-	r.PATCH("/cards/:id/info", auth.Handle((middleware.Handler(ContextHandler{cc, getAllCardsHandler}))))
+	r.PATCH("/cards/:id/info", fakeLogger.Handle(auth.Handle((middleware.Handler(ContextHandler{cc, getAllCardsHandler})))))
 
 	// We can then pass our router (after declaring all our routes) to this method
 	// (where previously, we were leaving the secodn argument as nil)
