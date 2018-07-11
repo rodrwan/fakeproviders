@@ -33,16 +33,17 @@ func (l *Logger) Handle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
-		l.logger.Infof("%s: %s | started %s", r.Method, r.URL, start.Format(LoggerDefaultDateFormat))
+		l.logger.Infof("%s %s started", r.Method, r.URL)
 		if r.Method == http.MethodOptions {
 			// router handles the OPTIONS request to obtain the list of allowed methods.
-			l.logger.Infof("%s: %s | took %.2fs", r.Method, r.URL, time.Since(start).Seconds())
 			next.ServeHTTP(w, r)
+			l.logger.Infof("%s %s | completed | took %.2fs", r.Method, r.URL, time.Since(start).Seconds())
 			return
 		}
 
-		l.logger.Infof("%s: %s | took %.2fs", r.Method, r.URL, time.Since(start).Seconds())
 		next.ServeHTTP(w, r)
+
+		l.logger.Infof("%s: %s | took %.2fs", r.Method, r.URL, time.Since(start).Seconds())
 	})
 }
 
