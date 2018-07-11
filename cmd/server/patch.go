@@ -39,7 +39,8 @@ func patch(ctx *Context, w http.ResponseWriter, r *http.Request) (*response, err
 			c.ReferenceID = patch.ReferenceID
 			c.UpdatedAt = time.Now()
 
-			*cc = *c
+			cc = c
+			break
 		}
 	}
 
