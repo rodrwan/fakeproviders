@@ -1,15 +1,12 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/Finciero/sigiriya"
 )
 
 type apiError struct {
@@ -45,9 +42,7 @@ var (
 	aVeryLongTimeAgo = time.Unix(1, 0)
 
 	errUnauthorizedAccess = newError(http.StatusUnauthorized, "unauthorized access")
-	errExpiredToken       = newError(http.StatusForbidden, "invalid or expired token")
-	errPasswordMismatch   = newError(http.StatusForbidden, "password and password confirmation mismatch")
-	errInvalidEmail       = newError(http.StatusNotFound, "user does not exists")
+	errTokenMismatch      = newError(http.StatusUnauthorized, "invalid token")
 )
 
 const (
@@ -58,19 +53,6 @@ const (
 	tokenHeaderKey  = "Authorization"
 	tokenMetaKey    = "auth_token"
 )
-
-// SessionFromContext returns the associated session with the given context.
-func SessionFromContext(c context.Context) *sigiriya.Session {
-	if s, ok := c.Value(authSessionContextKey).(*sigiriya.Session); ok {
-		return s
-	}
-	return nil
-}
-
-// SessionToContext associate session with the given context.
-func SessionToContext(c context.Context, us *sigiriya.Session) context.Context {
-	return context.WithValue(c, authSessionContextKey, us)
-}
 
 // AuthMiddleware provides a middleware to authenticate an incoming request.
 type AuthMiddleware struct {
@@ -92,12 +74,16 @@ func (m *AuthMiddleware) Handle(next http.Handler) http.Handler {
 			return
 		}
 
-		_, err := parseAuthCredentials(r)
+		token, err := parseAuthToken(r)
 		if err != nil {
 			errUnauthorizedAccess.Write(w)
 			return
 		}
 
+		if token != m.Token {
+			errTokenMismatch.Write(w)
+			return
+		}
 		ctx := r.Context()
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -114,27 +100,4 @@ func parseAuthToken(r *http.Request) (string, error) {
 		return "", errors.New("auth: no token authorization header present")
 	}
 	return header[len(tokenTypePrefix):], nil
-}
-
-func parseValidationToken(r *http.Request) (string, error) {
-	cookie, err := r.Cookie(authTokenCookieName)
-	if err != nil {
-		return "", err
-	}
-	return cookie.Value, nil
-}
-
-func parseAuthCredentials(r *http.Request) (*sigiriya.SessionCredentials, error) {
-	authToken, err := parseAuthToken(r)
-	if err != nil {
-		return nil, err
-	}
-	validationToken, err := parseValidationToken(r)
-	if err != nil {
-		return nil, err
-	}
-	return &sigiriya.SessionCredentials{
-		AuthToken:       authToken,
-		ValidationToken: validationToken,
-	}, nil
 }
