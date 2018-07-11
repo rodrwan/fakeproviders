@@ -47,8 +47,10 @@ func main() {
 	}
 	store := memory.NewStore()
 
+	// middlewares
 	fakeLogger := logger.NewLogger("fake provider")
 	middleware := stdlib.NewMiddleware(limiter.New(store, rate), stdlib.WithForwardHeader(true))
+	auth := NewAuthMiddleware(*token)
 
 	r.POST("/create", fakeLogger.Handle(middleware.Handler(ContextHandler{cc, create})))
 
@@ -56,8 +58,7 @@ func main() {
 
 	r.GET("/", fakeLogger.Handle(middleware.Handler(ContextHandler{cc, getAllCardsHandler})))
 
-	auth := NewAuthMiddleware(*token)
-	r.PATCH("/cards/:id/info", fakeLogger.Handle(auth.Handle((middleware.Handler(ContextHandler{cc, getAllCardsHandler})))))
+	r.PATCH("/cards/:id/info", fakeLogger.Handle(auth.Handle((middleware.Handler(ContextHandler{cc, patch})))))
 
 	// We can then pass our router (after declaring all our routes) to this method
 	// (where previously, we were leaving the secodn argument as nil)
