@@ -37,6 +37,27 @@ func main() {
 	cards := make([]*card, 0)
 	// This is where the router is useful, it allows us to declare methods that
 	// this path will be valid for
+	cards = append(cards, newCard(&user{
+		FirstName: "louane",
+		LastName:  "vidal",
+		Email:     "louane.vidal@example.com",
+	}))
+	cards = append(cards, newCard(&user{
+		FirstName: "noel",
+		LastName:  "peixoto",
+		Email:     "noel.peixoto@example.com",
+	}))
+	cards = append(cards, newCard(&user{
+		FirstName: "manuel",
+		LastName:  "lorenzo",
+		Email:     "manuel.lorenzo@example.com",
+	}))
+	cards = append(cards, newCard(&user{
+		FirstName: "alberto",
+		LastName:  "lozano",
+		Email:     "alberto.lozano@example.com",
+	}))
+
 	cc := &Context{
 		cards: cards,
 	}
@@ -98,7 +119,7 @@ func (r *response) Write(w http.ResponseWriter) error {
 type user struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
-	EmailName string `json:"email_name"`
+	Email     string `json:"email"`
 }
 
 type card struct {
