@@ -20,6 +20,7 @@ func (ah ContextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resp, err := ah.H(ah.ctx, w, r)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
 	}
 
 	switch resp.Status {
