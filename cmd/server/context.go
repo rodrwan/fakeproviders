@@ -26,8 +26,10 @@ func (ah ContextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch resp.Status {
 	case http.StatusNotFound:
 		http.NotFound(w, r)
+		return
 	case http.StatusInternalServerError:
 		http.Error(w, http.StatusText(resp.Status), resp.Status)
+		return
 	}
 
 	resp.Write(w)
