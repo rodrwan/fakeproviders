@@ -13,6 +13,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rodrwan/fakeprovider/logger"
+	"github.com/rs/cors"
 	"github.com/ulule/limiter"
 	"github.com/ulule/limiter/drivers/middleware/stdlib"
 	"github.com/ulule/limiter/drivers/store/memory"
@@ -81,7 +82,7 @@ func main() {
 	// We can then pass our router (after declaring all our routes) to this method
 	// (where previously, we were leaving the secodn argument as nil)
 	log.Printf("server running on %s", fmt.Sprintf(":%s", *port))
-	panic(http.ListenAndServe(fmt.Sprintf(":%s", *port), r))
+	panic(http.ListenAndServe(fmt.Sprintf(":%s", *port), cors.Default().Handler(r)))
 }
 
 func unmarshalJSON(r io.ReadCloser, v interface{}) error {
