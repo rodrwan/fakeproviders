@@ -82,7 +82,16 @@ func main() {
 	// We can then pass our router (after declaring all our routes) to this method
 	// (where previously, we were leaving the secodn argument as nil)
 	log.Printf("server running on %s", fmt.Sprintf(":%s", *port))
-	panic(http.ListenAndServe(fmt.Sprintf(":%s", *port), cors.Default().Handler(r)))
+
+	cors := cors.New(cors.Options{
+		AllowedOrigins:     []string{"*"}, // strings.Split(c.AllowedOrigins, ","),
+		AllowedHeaders:     []string{"Accept", "Authorization", "Content-Type"},
+		AllowedMethods:     []string{"GET", "POST", "PATCH", "DELETE"},
+		AllowCredentials:   true,
+		OptionsPassthrough: true,
+	})
+
+	panic(http.ListenAndServe(fmt.Sprintf(":%s", *port), cors.Handler(r)))
 }
 
 func unmarshalJSON(r io.ReadCloser, v interface{}) error {
