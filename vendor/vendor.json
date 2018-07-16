@@ -1,0 +1,85 @@
+{
+	"comment": "",
+	"heroku": {
+		"goVersion": "go1.9",
+		"install": [
+			"./cmd/server"
+		]
+	},
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "uFNLkTxk8BkHTk0Jcub2lj2BX4M=",
+			"path": "github.com/google/uuid",
+			"revision": "dec09d789f3dba190787f8b4454c7d3c936fed9e",
+			"revisionTime": "2017-11-29T19:10:14Z"
+		},
+		{
+			"checksumSHA1": "z/DzcKNumSHzzxg9Widbi9KgwNw=",
+			"path": "github.com/julienschmidt/httprouter",
+			"revision": "348b672cd90d8190f8240323e372ecd1e66b59dc",
+			"revisionTime": "2018-07-15T16:18:54Z"
+		},
+		{
+			"checksumSHA1": "ljd3FhYRJ91cLZz3wsH9BQQ2JbA=",
+			"path": "github.com/pkg/errors",
+			"revision": "816c9085562cd7ee03e7f8188a1cfd942858cded",
+			"revisionTime": "2018-03-11T21:45:15Z"
+		},
+		{
+			"checksumSHA1": "g47ll7Q0GMnnXa5LE4TkrqEapM4=",
+			"path": "github.com/rs/cors",
+			"revision": "3ca2b550f6a4333b63c845850f760a7d00412cd6",
+			"revisionTime": "2016-03-21T23:10:48Z"
+		},
+		{
+			"checksumSHA1": "uEgHSdDVcceCTdH3WSC/p9QKm0k=",
+			"path": "github.com/rs/xhandler",
+			"revision": "d9d9599b6aaf6a058cb7b1f48291ded2cbd13390",
+			"revisionTime": "2015-12-24T01:29:56Z"
+		},
+		{
+			"checksumSHA1": "/YsxkUA+LSSCvK4zVU7Oa3s0470=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "3d4380f53a34dcdc95f0c1db702615992b38d9a4",
+			"revisionTime": "2017-06-20T14:45:10Z"
+		},
+		{
+			"checksumSHA1": "LsWce/iI7Fum4U6R18jzoInrxzk=",
+			"path": "github.com/ulule/limiter",
+			"revision": "af07f8759cbc68c744a15ffbfdabf35f7aff5e3b",
+			"revisionTime": "2018-05-14T19:57:53Z"
+		},
+		{
+			"checksumSHA1": "hkmo8uVrehSVGVG2LkOseAaoSBg=",
+			"path": "github.com/ulule/limiter/drivers/middleware/stdlib",
+			"revision": "af07f8759cbc68c744a15ffbfdabf35f7aff5e3b",
+			"revisionTime": "2018-05-14T19:57:53Z"
+		},
+		{
+			"checksumSHA1": "7syqsHkDxXhjLoR00T0yNzOEE+Q=",
+			"path": "github.com/ulule/limiter/drivers/store/common",
+			"revision": "af07f8759cbc68c744a15ffbfdabf35f7aff5e3b",
+			"revisionTime": "2018-05-14T19:57:53Z"
+		},
+		{
+			"checksumSHA1": "4Zs9IDhHW4QTMc0Fu/XlPeVjFa8=",
+			"path": "github.com/ulule/limiter/drivers/store/memory",
+			"revision": "af07f8759cbc68c744a15ffbfdabf35f7aff5e3b",
+			"revisionTime": "2018-05-14T19:57:53Z"
+		},
+		{
+			"checksumSHA1": "hMj8vjbjGCAE368E3xAjZGFON+E=",
+			"path": "github.com/urfave/negroni",
+			"revision": "3f7ce7b928e14ff890b067e5bbbc80af73690a9c",
+			"revisionTime": "2016-09-09T03:51:52Z"
+		},
+		{
+			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
+			"path": "golang.org/x/net/context",
+			"revision": "32a936f46389aa10549d60bd7833e54b01685d09",
+			"revisionTime": "2018-06-24T16:29:30Z"
+		}
+	],
+	"rootPath": "github.com/rodrwan/fakeprovider"
+}

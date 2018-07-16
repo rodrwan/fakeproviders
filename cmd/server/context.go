@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 // Context context holds shared data between services and handlers
 type Context struct {
@@ -17,6 +20,10 @@ type ContextHandler struct {
 // access our *appContext's fields (templates, loggers, etc.) as well.
 func (ah ContextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Updated to pass ah.appContext as a parameter to our handler type.
+	if r.Method == http.MethodOptions {
+		fmt.Println("SKIP OPTIONS")
+		return
+	}
 	resp, err := ah.H(ah.ctx, w, r)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

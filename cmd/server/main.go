@@ -13,7 +13,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rodrwan/fakeprovider/logger"
-	"github.com/rs/cors"
+	corsLib "github.com/rs/cors"
 	"github.com/ulule/limiter"
 	"github.com/ulule/limiter/drivers/middleware/stdlib"
 	"github.com/ulule/limiter/drivers/store/memory"
@@ -72,19 +72,19 @@ func main() {
 	// middlewares
 	fakeLogger := logger.NewLogger("fake provider")
 	rateLimit := stdlib.NewMiddleware(limiter.New(store, rate), stdlib.WithForwardHeader(true))
-	auth := NewAuthMiddleware(*token)
+	// auth := NewAuthMiddleware(*token)
 
 	r := NewRouter()
+	r.GET("/", fakeLogger.Handle(rateLimit.Handler(ContextHandler{cc, getAllCardsHandler})))
 	r.POST("/cards", fakeLogger.Handle(rateLimit.Handler(ContextHandler{cc, create})))
 	r.POST("/load", fakeLogger.Handle(rateLimit.Handler(ContextHandler{cc, loadHandler})))
-	r.GET("/", fakeLogger.Handle(rateLimit.Handler(ContextHandler{cc, getAllCardsHandler})))
-	r.PATCH("/cards/:id/info", fakeLogger.Handle(auth.Handle((rateLimit.Handler(ContextHandler{cc, patch})))))
+	r.PATCH("/cards/:id/info", ContextHandler{cc, patch})
 
 	// We can then pass our router (after declaring all our routes) to this method
 	// (where previously, we were leaving the secodn argument as nil)
 	log.Printf("server running on %s", fmt.Sprintf(":%s", *port))
 
-	cors := cors.New(cors.Options{
+	cors := corsLib.New(corsLib.Options{
 		AllowedOrigins:     []string{"*"},
 		AllowedHeaders:     []string{"Accept", "Authorization", "Content-Type", "Credentials"},
 		AllowedMethods:     []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
@@ -94,7 +94,13 @@ func main() {
 	})
 
 	routes := negroni.Wrap(r)
-	panic(http.ListenAndServe(fmt.Sprintf(":%s", *port), negroni.New(cors, routes)))
+	n := negroni.New(negroni.NewRecovery(), negroni.NewLogger())
+
+	mux := http.NewServeMux()
+
+	mux.Handle("/", negroni.New(cors, routes))
+	n.UseHandler(mux)
+	panic(http.ListenAndServe(fmt.Sprintf(":%s", *port), n))
 }
 
 func unmarshalJSON(r io.ReadCloser, v interface{}) error {

@@ -55,6 +55,7 @@ func NewRouter() *Router {
 			RedirectTrailingSlash:  true,
 			RedirectFixedPath:      true,
 			HandleMethodNotAllowed: true,
+			HandleOPTIONS:          true,
 		},
 	}
 }
