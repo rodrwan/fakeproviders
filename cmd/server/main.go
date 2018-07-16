@@ -86,9 +86,10 @@ func main() {
 	cors := cors.New(cors.Options{
 		AllowedOrigins:     []string{"*"}, // strings.Split(c.AllowedOrigins, ","),
 		AllowedHeaders:     []string{"Accept", "Authorization", "Content-Type"},
-		AllowedMethods:     []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
+		AllowedMethods:     []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS", "OPTION"},
 		AllowCredentials:   true,
 		OptionsPassthrough: true,
+		Debug:              true,
 	})
 
 	panic(http.ListenAndServe(fmt.Sprintf(":%s", *port), cors.Handler(r)))
