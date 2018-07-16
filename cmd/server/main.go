@@ -84,8 +84,8 @@ func main() {
 	log.Printf("server running on %s", fmt.Sprintf(":%s", *port))
 
 	cors := cors.New(cors.Options{
-		AllowedOrigins:     []string{"*"}, // strings.Split(c.AllowedOrigins, ","),
-		AllowedHeaders:     []string{"Accept", "Authorization", "Content-Type"},
+		AllowedOrigins:     []string{"*"},
+		AllowedHeaders:     []string{"Accept", "Authorization", "Content-Type", "Credentials"},
 		AllowedMethods:     []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
 		AllowCredentials:   true,
 		OptionsPassthrough: true,
