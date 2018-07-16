@@ -72,13 +72,13 @@ func main() {
 	// middlewares
 	fakeLogger := logger.NewLogger("fake provider")
 	rateLimit := stdlib.NewMiddleware(limiter.New(store, rate), stdlib.WithForwardHeader(true))
-	// auth := NewAuthMiddleware(*token)
+	auth := NewAuthMiddleware(*token)
 
 	r := NewRouter()
 	r.GET("/", fakeLogger.Handle(rateLimit.Handler(ContextHandler{cc, getAllCardsHandler})))
 	r.POST("/cards", fakeLogger.Handle(rateLimit.Handler(ContextHandler{cc, create})))
 	r.POST("/load", fakeLogger.Handle(rateLimit.Handler(ContextHandler{cc, loadHandler})))
-	r.PATCH("/cards/:id/info", ContextHandler{cc, patch})
+	r.PATCH("/cards/:id/info", fakeLogger.Handle(auth.Handle(ContextHandler{cc, patch})))
 
 	// We can then pass our router (after declaring all our routes) to this method
 	// (where previously, we were leaving the secodn argument as nil)
@@ -94,7 +94,7 @@ func main() {
 	})
 
 	routes := negroni.Wrap(r)
-	n := negroni.New(negroni.NewRecovery(), negroni.NewLogger())
+	n := negroni.New(negroni.NewRecovery())
 
 	mux := http.NewServeMux()
 
