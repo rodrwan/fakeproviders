@@ -17,6 +17,7 @@ import (
 	"github.com/ulule/limiter"
 	"github.com/ulule/limiter/drivers/middleware/stdlib"
 	"github.com/ulule/limiter/drivers/store/memory"
+	"github.com/urfave/negroni"
 )
 
 const (
@@ -33,7 +34,6 @@ var (
 
 func main() {
 	flag.Parse()
-	r := NewRouter()
 
 	cards := make([]*card, 0)
 	// This is where the router is useful, it allows us to declare methods that
@@ -74,7 +74,8 @@ func main() {
 	rateLimit := stdlib.NewMiddleware(limiter.New(store, rate), stdlib.WithForwardHeader(true))
 	auth := NewAuthMiddleware(*token)
 
-	r.POST("/create", fakeLogger.Handle(rateLimit.Handler(ContextHandler{cc, create})))
+	r := NewRouter()
+	r.POST("/cards", fakeLogger.Handle(rateLimit.Handler(ContextHandler{cc, create})))
 	r.POST("/load", fakeLogger.Handle(rateLimit.Handler(ContextHandler{cc, loadHandler})))
 	r.GET("/", fakeLogger.Handle(rateLimit.Handler(ContextHandler{cc, getAllCardsHandler})))
 	r.PATCH("/cards/:id/info", fakeLogger.Handle(auth.Handle((rateLimit.Handler(ContextHandler{cc, patch})))))
@@ -92,7 +93,8 @@ func main() {
 		Debug:              true,
 	})
 
-	panic(http.ListenAndServe(fmt.Sprintf(":%s", *port), cors.Handler(r)))
+	routes := negroni.Wrap(r)
+	panic(http.ListenAndServe(fmt.Sprintf(":%s", *port), negroni.New(cors, routes)))
 }
 
 func unmarshalJSON(r io.ReadCloser, v interface{}) error {
