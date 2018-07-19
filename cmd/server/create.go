@@ -22,7 +22,7 @@ func create(ctx *Context, w http.ResponseWriter, r *http.Request) (*response, er
 
 	for _, c := range ctx.cards {
 		if c.User.Email == create.Email {
-			return nil, errors.New("User already have a card.")
+			return nil, errors.New("user already have a card")
 		}
 	}
 
