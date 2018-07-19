@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -17,6 +18,12 @@ func create(ctx *Context, w http.ResponseWriter, r *http.Request) (*response, er
 	if err := unmarshalJSON(r.Body, &create); err != nil {
 		log.Println(fmt.Errorf("Error: %v", err))
 		return nil, err
+	}
+
+	for _, c := range ctx.cards {
+		if c.User.Email == create.Email {
+			return nil, errors.New("User already have a card.")
+		}
 	}
 
 	c := newCard(&create.user)

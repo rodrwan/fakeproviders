@@ -149,6 +149,7 @@ type card struct {
 	ExpDate     string    `json:"exp_date"`
 	CVV         string    `json:"cvv"`
 	Balance     int64     `json:"balance"`
+	User        *user     `json:"user"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
@@ -174,6 +175,11 @@ func (c *card) SetExpDate() {
 func (c *card) SetBalance(balance int64) {
 	c.Balance = balance
 }
+
+func (c *card) SetUser(u *user) {
+	c.User = u
+}
+
 func newCard(u *user) *card {
 	c := &card{}
 
@@ -183,6 +189,7 @@ func newCard(u *user) *card {
 	c.SetExpDate()
 	c.SetReferenceID()
 	c.SetBalance(0)
+	c.SetUser(u)
 	c.CreatedAt = time.Now()
 	c.UpdatedAt = time.Now()
 
