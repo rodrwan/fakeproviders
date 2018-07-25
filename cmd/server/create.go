@@ -22,6 +22,12 @@ func create(ctx *Context, w http.ResponseWriter, r *http.Request) (*response, er
 		return nil, err
 	}
 
+	for _, c := range ctx.cards {
+		if c.User.Email == create.Email {
+			return nil, errors.New("user already have a card")
+		}
+	}
+
 	c := newCard(&create.user)
 	if err := randomError(); err != nil {
 		return nil, err
