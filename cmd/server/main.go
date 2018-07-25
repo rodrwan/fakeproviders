@@ -135,6 +135,36 @@ func (r *response) Write(w http.ResponseWriter) error {
 	return err
 }
 
+type errorResponse struct {
+	Status int         `json:"-"`
+	Data   interface{} `json:"data,omitempty"`
+}
+
+type errorMessage struct {
+	Message string `json:"message"`
+}
+
+// Write writes a ApplicationResposne to the given response writer encoded as JSON.
+func (er *errorResponse) Write(w http.ResponseWriter) error {
+	b, err := json.Marshal(er)
+	if err != nil {
+		return err
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(er.Status)
+	_, err = w.Write(b)
+	return err
+}
+
+func NewError(msg string, status int) *errorResponse {
+	return &errorResponse{
+		Status: status,
+		Data: &errorMessage{
+			Message: msg,
+		},
+	}
+}
+
 type user struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`

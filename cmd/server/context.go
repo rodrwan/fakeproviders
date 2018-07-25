@@ -20,7 +20,7 @@ type ContextHandler struct {
 func (ah ContextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	resp, err := ah.H(ah.ctx, w, r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		NewError(err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -29,7 +29,7 @@ func (ah ContextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	case http.StatusInternalServerError:
-		http.Error(w, http.StatusText(resp.Status), resp.Status)
+		NewError(err.Error(), http.StatusInternalServerError)
 		return
 	}
 
