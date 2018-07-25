@@ -1,9 +1,12 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
 )
 
 type createRequestData struct {
@@ -20,6 +23,9 @@ func create(ctx *Context, w http.ResponseWriter, r *http.Request) (*response, er
 	}
 
 	c := newCard(&create.user)
+	if err := randomError(); err != nil {
+		return nil, err
+	}
 	ctx.cards = append(ctx.cards, c)
 
 	return &response{
@@ -27,4 +33,15 @@ func create(ctx *Context, w http.ResponseWriter, r *http.Request) (*response, er
 		Data:   c,
 	}, nil
 
+}
+
+func randomError() error {
+	rand.Seed(time.Now().UTC().UnixNano())
+	prob := rand.Float64()
+
+	if prob > 0.3 {
+		return errors.New("Something went wrong")
+	}
+
+	return nil
 }
