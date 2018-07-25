@@ -136,8 +136,8 @@ func (r *response) Write(w http.ResponseWriter) error {
 }
 
 type errorResponse struct {
-	Status int         `json:"-"`
-	Data   interface{} `json:"data,omitempty"`
+	Status int           `json:"-"`
+	Error  *errorMessage `json:"error,omitempty"`
 }
 
 type errorMessage struct {
@@ -156,10 +156,11 @@ func (er *errorResponse) Write(w http.ResponseWriter) error {
 	return err
 }
 
+// NewError ...NewError
 func NewError(msg string, status int) *errorResponse {
 	return &errorResponse{
 		Status: status,
-		Data: &errorMessage{
+		Error: &errorMessage{
 			Message: msg,
 		},
 	}
