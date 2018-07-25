@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 )
 
@@ -19,11 +18,6 @@ type ContextHandler struct {
 // Our ServeHTTP method is mostly the same, and also has the ability to
 // access our *appContext's fields (templates, loggers, etc.) as well.
 func (ah ContextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// Updated to pass ah.appContext as a parameter to our handler type.
-	if r.Method == http.MethodOptions {
-		fmt.Println("SKIP OPTIONS")
-		return
-	}
 	resp, err := ah.H(ah.ctx, w, r)
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
