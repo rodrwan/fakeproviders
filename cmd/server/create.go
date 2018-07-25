@@ -46,6 +46,7 @@ func randomError() error {
 	prob := rand.Float64()
 
 	if prob > 0.3 {
+		log.Println("Somthing funny (:")
 		return errors.New("Something went wrong")
 	}
 
