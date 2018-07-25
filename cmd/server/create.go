@@ -45,8 +45,8 @@ func randomError() error {
 	rand.Seed(time.Now().UTC().UnixNano())
 	prob := rand.Float64()
 
-	if prob > 0.3 {
-		log.Println("Somthing funny (:")
+	if prob < 0.3 {
+		log.Println("Something funny (:")
 		return errors.New("Something went wrong")
 	}
 
