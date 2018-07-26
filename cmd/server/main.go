@@ -11,8 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/meatballhat/negroni-logrus"
-	"github.com/sirupsen/logrus"
+	"github.com/rodrwan/fakeprovider/logger"
 
 	"github.com/ulule/limiter/drivers/middleware/stdlib"
 
@@ -21,7 +20,6 @@ import (
 	corsLib "github.com/rs/cors"
 	"github.com/ulule/limiter"
 	"github.com/ulule/limiter/drivers/store/memory"
-	"github.com/urfave/negroni"
 )
 
 const (
@@ -75,6 +73,7 @@ func main() {
 
 	// middlewares
 
+	fakeLogger := logger.NewLogger("fakeprovider")
 	rateLimitMid := stdlib.NewMiddleware(
 		limiter.New(store, rate),
 		stdlib.WithForwardHeader(true),
@@ -85,10 +84,10 @@ func main() {
 	auth := NewAuthMiddleware(*token)
 
 	r := NewRouter()
-	r.GET("/", rateLimitMid.Handler(ContextHandler{cc, getAllCardsHandler}))
-	r.POST("/cards", rateLimitMid.Handler(ContextHandler{cc, create}))
-	r.POST("/load", rateLimitMid.Handler(ContextHandler{cc, loadHandler}))
-	r.PATCH("/cards/:id/info", auth.Handle(ContextHandler{cc, patch}))
+	r.GET("/", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, getAllCardsHandler})))
+	r.POST("/cards", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, create})))
+	r.POST("/load", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, loadHandler})))
+	r.PATCH("/cards/:id/info", fakeLogger.Handle(auth.Handle(ContextHandler{cc, patch})))
 
 	// We can then pass our router (after declaring all our routes) to this method
 	// (where previously, we were leaving the secodn argument as nil)
@@ -103,19 +102,19 @@ func main() {
 		Debug:              true,
 	})
 
-	routes := negroni.Wrap(r)
-	n := negroni.New()
-	n.Use(negroni.NewRecovery())
+	// routes := negroni.Wrap(r)
+	// n := negroni.New()
+	// n.Use(negroni.NewRecovery())
 
-	logger := logrus.New()
-	logger.Formatter = &logrus.JSONFormatter{}
+	// logger := logrus.New()
+	// logger.Formatter = &logrus.JSONFormatter{}
 
-	n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "fake-provider"))
+	// n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "fake-provider"))
 	mux := http.NewServeMux()
 
-	mux.Handle("/", negroni.New(cors, routes))
-	n.UseHandler(mux)
-	panic(http.ListenAndServe(fmt.Sprintf(":%s", *port), n))
+	mux.Handle("/", cors.Handler(r))
+	// n.UseHandler(mux)
+	panic(http.ListenAndServe(fmt.Sprintf(":%s", *port), mux))
 }
 
 func unmarshalJSON(r io.ReadCloser, v interface{}) error {
