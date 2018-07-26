@@ -35,19 +35,18 @@ func (w MyResponseWriter) Status() int {
 }
 
 // Header Satisfy the http.ResponseWriter interface
-func (w MyResponseWriter) Header() http.Header {
+func (w *MyResponseWriter) Header() http.Header {
 	return w.ResponseWriter.Header()
 }
 
-func (w MyResponseWriter) Write(data []byte) (int, error) {
+func (w *MyResponseWriter) Write(data []byte) (int, error) {
 	return w.ResponseWriter.Write(data)
 }
 
 // WriteHeader ...
-func (w MyResponseWriter) WriteHeader(statusCode int) {
+func (w *MyResponseWriter) WriteHeader(statusCode int) {
 	// Store the status code
 	w.status = statusCode
-
 	// Write the status code onward.
 	w.ResponseWriter.WriteHeader(statusCode)
 }
