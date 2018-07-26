@@ -31,7 +31,7 @@ type ResponseWriter interface {
 
 type beforeFunc func(ResponseWriter)
 
-func newMyResponseWriter(res http.ResponseWriter) ResponseWriter {
+func newResponseWriter(res http.ResponseWriter) ResponseWriter {
 	mrw := &responseWriter{
 		ResponseWriter: res,
 	}

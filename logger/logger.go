@@ -36,31 +36,29 @@ func NewLogger(svc string) *Logger {
 // Handle print incoming request
 func (l *Logger) Handle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-
-		entry := logrus.NewEntry(l.logger)
-		entry = l.before(entry, r, l.name)
-
-		entry.Info("starting request")
-
-		if r.Method == http.MethodOptions {
-			// router handles the OPTIONS request to obtain the list of allowed methods.
-			next.ServeHTTP(rw, r)
-			res := rw.(ResponseWriter)
-			l.after(entry, res, start, l.name).Info("request completed")
-			return
-		}
-
 		next.ServeHTTP(rw, r)
-
-		res := rw.(ResponseWriter)
-		l.after(entry, res, start, l.name).Info("request completed")
 	})
 }
 
 // ServeHTTP implements a negroni compatible signature.
-func (l *Logger) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	l.Handle(next).ServeHTTP(w, r)
+func (l *Logger) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+	start := time.Now()
+
+	entry := logrus.NewEntry(l.logger)
+	entry = l.before(entry, r, l.name)
+
+	entry.Info("starting request")
+
+	if r.Method == http.MethodOptions {
+		// router handles the OPTIONS request to obtain the list of allowed methods.
+		next.ServeHTTP(rw, r)
+		res := rw.(ResponseWriter)
+		l.after(entry, res, start, l.name).Info("request completed")
+		return
+	}
+	l.Handle(next).ServeHTTP(rw, r)
+	res := rw.(ResponseWriter)
+	l.after(entry, res, start, l.name).Info("request completed")
 }
 
 // DefaultBefore print log before request
