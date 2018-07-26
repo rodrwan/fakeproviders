@@ -30,7 +30,7 @@ func newMyResponseWriter(res http.ResponseWriter) ResponseWriter {
 }
 
 // Status Give a way to get the status
-func (w MyResponseWriter) Status() int {
+func (w *MyResponseWriter) Status() int {
 	return w.status
 }
 
