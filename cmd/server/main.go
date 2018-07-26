@@ -11,11 +11,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/meatballhat/negroni-logrus"
+	"github.com/sirupsen/logrus"
+
 	"github.com/ulule/limiter/drivers/middleware/stdlib"
 
 	"github.com/google/uuid"
 	apierror "github.com/rodrwan/fakeprovider/api-error"
-	"github.com/rodrwan/fakeprovider/logger"
 	corsLib "github.com/rs/cors"
 	"github.com/ulule/limiter"
 	"github.com/ulule/limiter/drivers/store/memory"
@@ -72,7 +74,6 @@ func main() {
 	store := memory.NewStore()
 
 	// middlewares
-	fakeLogger := logger.NewLogger("fake provider")
 
 	rateLimitMid := stdlib.NewMiddleware(
 		limiter.New(store, rate),
@@ -84,10 +85,10 @@ func main() {
 	auth := NewAuthMiddleware(*token)
 
 	r := NewRouter()
-	r.GET("/", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, getAllCardsHandler})))
-	r.POST("/cards", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, create})))
-	r.POST("/load", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, loadHandler})))
-	r.PATCH("/cards/:id/info", fakeLogger.Handle(auth.Handle(ContextHandler{cc, patch})))
+	r.GET("/", rateLimitMid.Handler(ContextHandler{cc, getAllCardsHandler}))
+	r.POST("/cards", rateLimitMid.Handler(ContextHandler{cc, create}))
+	r.POST("/load", rateLimitMid.Handler(ContextHandler{cc, loadHandler}))
+	r.PATCH("/cards/:id/info", auth.Handle(ContextHandler{cc, patch}))
 
 	// We can then pass our router (after declaring all our routes) to this method
 	// (where previously, we were leaving the secodn argument as nil)
@@ -103,8 +104,13 @@ func main() {
 	})
 
 	routes := negroni.Wrap(r)
-	n := negroni.New(negroni.NewRecovery())
+	n := negroni.New()
+	n.Use(negroni.NewRecovery())
 
+	logger := logrus.New()
+	logger.Formatter = &logrus.JSONFormatter{}
+
+	n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "fake-provider"))
 	mux := http.NewServeMux()
 
 	mux.Handle("/", negroni.New(cors, routes))
