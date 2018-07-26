@@ -13,9 +13,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rodrwan/fakeprovider/logger"
+	ratelimit "github.com/rodrwan/fakeprovider/rate-limit"
 	corsLib "github.com/rs/cors"
 	"github.com/ulule/limiter"
-	"github.com/ulule/limiter/drivers/middleware/stdlib"
 	"github.com/ulule/limiter/drivers/store/memory"
 	"github.com/urfave/negroni"
 )
@@ -71,13 +71,17 @@ func main() {
 
 	// middlewares
 	fakeLogger := logger.NewLogger("fake provider")
-	rateLimit := stdlib.NewMiddleware(limiter.New(store, rate), stdlib.WithForwardHeader(true))
+
+	rateLimitMid := ratelimit.NewMiddleware(
+		limiter.New(store, rate),
+		ratelimit.WithForwardHeader(true),
+	)
 	auth := NewAuthMiddleware(*token)
 
 	r := NewRouter()
-	r.GET("/", fakeLogger.Handle(rateLimit.Handler(ContextHandler{cc, getAllCardsHandler})))
-	r.POST("/cards", fakeLogger.Handle(rateLimit.Handler(ContextHandler{cc, create})))
-	r.POST("/load", fakeLogger.Handle(rateLimit.Handler(ContextHandler{cc, loadHandler})))
+	r.GET("/", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, getAllCardsHandler})))
+	r.POST("/cards", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, create})))
+	r.POST("/load", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, loadHandler})))
 	r.PATCH("/cards/:id/info", fakeLogger.Handle(auth.Handle(ContextHandler{cc, patch})))
 
 	// We can then pass our router (after declaring all our routes) to this method
