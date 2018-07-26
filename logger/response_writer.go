@@ -1,10 +1,15 @@
 package logger
 
-import "net/http"
+import (
+	"bufio"
+	"fmt"
+	"net"
+	"net/http"
+)
 
-// MyResponseWriter wraps a standard http.ResponseWriter
+// responseWriter wraps a standard http.ResponseWriter
 // so we can store the status code.
-type MyResponseWriter struct {
+type responseWriter struct {
 	http.ResponseWriter
 	status      int
 	beforeFuncs []beforeFunc
@@ -27,7 +32,7 @@ type ResponseWriter interface {
 type beforeFunc func(ResponseWriter)
 
 func newMyResponseWriter(res http.ResponseWriter) ResponseWriter {
-	mrw := &MyResponseWriter{
+	mrw := &responseWriter{
 		ResponseWriter: res,
 	}
 
@@ -39,61 +44,68 @@ func newMyResponseWriter(res http.ResponseWriter) ResponseWriter {
 }
 
 // Status Give a way to get the status
-func (w *MyResponseWriter) Status() int {
-	return w.status
+func (rw *responseWriter) Status() int {
+	return rw.status
 }
 
 // Header Satisfy the http.ResponseWriter interface
-func (w *MyResponseWriter) Header() http.Header {
-	return w.ResponseWriter.Header()
+func (rw *responseWriter) Header() http.Header {
+	return rw.ResponseWriter.Header()
 }
 
-func (w *MyResponseWriter) Written() bool {
-	return w.status != 0
+func (rw *responseWriter) Written() bool {
+	return rw.status != 0
 }
 
 // Before ...
-func (w *MyResponseWriter) Before(before func(ResponseWriter)) {
-	w.beforeFuncs = append(w.beforeFuncs, before)
+func (rw *responseWriter) Before(before func(ResponseWriter)) {
+	rw.beforeFuncs = append(rw.beforeFuncs, before)
 }
 
-func (w *MyResponseWriter) Write(b []byte) (int, error) {
-	if !w.Written() {
+func (rw *responseWriter) Write(b []byte) (int, error) {
+	if !rw.Written() {
 		// The status will be StatusOK if WriteHeader has not been called yet
-		w.WriteHeader(http.StatusOK)
+		rw.WriteHeader(http.StatusOK)
 	}
-	size, err := w.ResponseWriter.Write(b)
-	return size, err
+	return rw.ResponseWriter.Write(b)
 }
 
 // WriteHeader ...
-func (w *MyResponseWriter) WriteHeader(statusCode int) {
+func (rw *responseWriter) WriteHeader(statusCode int) {
 	// Store the status code
-	w.status = statusCode
-	w.callBefore()
+	rw.status = statusCode
+	rw.callBefore()
 	// Write the status code onward.
-	w.ResponseWriter.WriteHeader(statusCode)
+	rw.ResponseWriter.WriteHeader(statusCode)
 }
 
-func (w *MyResponseWriter) callBefore() {
-	for i := len(w.beforeFuncs) - 1; i >= 0; i-- {
-		w.beforeFuncs[i](w)
+func (rw *responseWriter) callBefore() {
+	for i := len(rw.beforeFuncs) - 1; i >= 0; i-- {
+		rw.beforeFuncs[i](rw)
 	}
 }
 
-func (w *MyResponseWriter) Flush() {
-	flusher, ok := w.ResponseWriter.(http.Flusher)
+func (rw *responseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	hijacker, ok := rw.ResponseWriter.(http.Hijacker)
+	if !ok {
+		return nil, nil, fmt.Errorf("the ResponseWriter doesn't support the Hijacker interface")
+	}
+	return hijacker.Hijack()
+}
+
+func (rw *responseWriter) Flush() {
+	flusher, ok := rw.ResponseWriter.(http.Flusher)
 	if ok {
-		if !w.Written() {
+		if !rw.Written() {
 			// The status will be StatusOK if WriteHeader has not been called yet
-			w.WriteHeader(http.StatusOK)
+			rw.WriteHeader(http.StatusOK)
 		}
 		flusher.Flush()
 	}
 }
 
 type responseWriterCloseNotifer struct {
-	*MyResponseWriter
+	*responseWriter
 }
 
 func (rw *responseWriterCloseNotifer) CloseNotify() <-chan bool {

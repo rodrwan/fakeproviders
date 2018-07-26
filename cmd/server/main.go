@@ -72,7 +72,6 @@ func main() {
 	store := memory.NewStore()
 
 	// middlewares
-
 	fakeLogger := logger.NewLogger("fakeprovider")
 	rateLimitMid := stdlib.NewMiddleware(
 		limiter.New(store, rate),
@@ -89,8 +88,6 @@ func main() {
 	r.POST("/load", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, loadHandler})))
 	r.PATCH("/cards/:id/info", fakeLogger.Handle(auth.Handle(ContextHandler{cc, patch})))
 
-	// We can then pass our router (after declaring all our routes) to this method
-	// (where previously, we were leaving the secodn argument as nil)
 	log.Printf("server running on %s", fmt.Sprintf(":%s", *port))
 
 	cors := corsLib.New(corsLib.Options{
@@ -102,18 +99,8 @@ func main() {
 		Debug:              true,
 	})
 
-	// routes := negroni.Wrap(r)
-	// n := negroni.New()
-	// n.Use(negroni.NewRecovery())
-
-	// logger := logrus.New()
-	// logger.Formatter = &logrus.JSONFormatter{}
-
-	// n.Use(negronilogrus.NewMiddlewareFromLogger(logger, "fake-provider"))
 	mux := http.NewServeMux()
-
 	mux.Handle("/", cors.Handler(r))
-	// n.UseHandler(mux)
 	panic(http.ListenAndServe(fmt.Sprintf(":%s", *port), mux))
 }
 
