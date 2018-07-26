@@ -46,14 +46,14 @@ func (l *Logger) Handle(next http.Handler) http.Handler {
 		if r.Method == http.MethodOptions {
 			// router handles the OPTIONS request to obtain the list of allowed methods.
 			next.ServeHTTP(rw, r)
-			res := newMyResponseWriter(rw)
+			res := rw.(ResponseWriter)
 			l.after(entry, res, start, l.name).Info("request completed")
 			return
 		}
 
 		next.ServeHTTP(rw, r)
 
-		res := newMyResponseWriter(rw)
+		res := rw.(ResponseWriter)
 		l.after(entry, res, start, l.name).Info("request completed")
 	})
 }
