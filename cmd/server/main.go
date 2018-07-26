@@ -11,9 +11,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ulule/limiter/drivers/middleware/stdlib"
+
 	"github.com/google/uuid"
+	apierror "github.com/rodrwan/fakeprovider/api-error"
 	"github.com/rodrwan/fakeprovider/logger"
-	ratelimit "github.com/rodrwan/fakeprovider/rate-limit"
 	corsLib "github.com/rs/cors"
 	"github.com/ulule/limiter"
 	"github.com/ulule/limiter/drivers/store/memory"
@@ -72,9 +74,12 @@ func main() {
 	// middlewares
 	fakeLogger := logger.NewLogger("fake provider")
 
-	rateLimitMid := ratelimit.NewMiddleware(
+	rateLimitMid := stdlib.NewMiddleware(
 		limiter.New(store, rate),
-		ratelimit.WithForwardHeader(true),
+		stdlib.WithForwardHeader(true),
+		stdlib.WithLimitReachedHandler(func(w http.ResponseWriter, r *http.Request) {
+			apierror.NewError("Limit exceeded", http.StatusTooManyRequests).Write(w)
+		}),
 	)
 	auth := NewAuthMiddleware(*token)
 
