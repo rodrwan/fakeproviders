@@ -13,9 +13,12 @@ type MyResponseWriter struct {
 // ResponseWriter ...
 type ResponseWriter interface {
 	http.ResponseWriter
+	http.Flusher
 	// Status returns the status code of the response or 0 if the response has
 	// not been written
 	Status() int
+	// Written returns whether or not the ResponseWriter has been written.
+	Written() bool
 	// Before allows for a function to be called before the ResponseWriter has been written to. This is
 	// useful for setting headers or any other operations that must happen before a response has been written.
 	Before(func(ResponseWriter))
@@ -45,13 +48,22 @@ func (w *MyResponseWriter) Header() http.Header {
 	return w.ResponseWriter.Header()
 }
 
+func (w *MyResponseWriter) Written() bool {
+	return w.status != 0
+}
+
 // Before ...
 func (w *MyResponseWriter) Before(before func(ResponseWriter)) {
 	w.beforeFuncs = append(w.beforeFuncs, before)
 }
 
-func (w *MyResponseWriter) Write(data []byte) (int, error) {
-	return w.ResponseWriter.Write(data)
+func (w *MyResponseWriter) Write(b []byte) (int, error) {
+	if !w.Written() {
+		// The status will be StatusOK if WriteHeader has not been called yet
+		w.WriteHeader(http.StatusOK)
+	}
+	size, err := w.ResponseWriter.Write(b)
+	return size, err
 }
 
 // WriteHeader ...
@@ -66,6 +78,17 @@ func (w *MyResponseWriter) WriteHeader(statusCode int) {
 func (w *MyResponseWriter) callBefore() {
 	for i := len(w.beforeFuncs) - 1; i >= 0; i-- {
 		w.beforeFuncs[i](w)
+	}
+}
+
+func (w *MyResponseWriter) Flush() {
+	flusher, ok := w.ResponseWriter.(http.Flusher)
+	if ok {
+		if !w.Written() {
+			// The status will be StatusOK if WriteHeader has not been called yet
+			w.WriteHeader(http.StatusOK)
+		}
+		flusher.Flush()
 	}
 }
 
