@@ -9,10 +9,24 @@ type MyResponseWriter struct {
 	http.ResponseWriter
 }
 
-func newMyResponseWriter(res http.ResponseWriter) *MyResponseWriter {
-	return &MyResponseWriter{
+// ResponseWriter ...
+type ResponseWriter interface {
+	http.ResponseWriter
+	// Status returns the status code of the response or 0 if the response has
+	// not been written
+	Status() int
+}
+
+func newMyResponseWriter(res http.ResponseWriter) ResponseWriter {
+	mrw := &MyResponseWriter{
 		ResponseWriter: res,
 	}
+
+	if _, ok := res.(http.CloseNotifier); ok {
+		return &responseWriterCloseNotifer{mrw}
+	}
+
+	return mrw
 }
 
 // Status Give a way to get the status
@@ -36,4 +50,12 @@ func (w MyResponseWriter) WriteHeader(statusCode int) {
 
 	// Write the status code onward.
 	w.ResponseWriter.WriteHeader(statusCode)
+}
+
+type responseWriterCloseNotifer struct {
+	*MyResponseWriter
+}
+
+func (rw *responseWriterCloseNotifer) CloseNotify() <-chan bool {
+	return rw.ResponseWriter.(http.CloseNotifier).CloseNotify()
 }

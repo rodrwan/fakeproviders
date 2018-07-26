@@ -17,7 +17,7 @@ type Logger struct {
 	name   string
 	logger *logrus.Logger
 	before func(*logrus.Entry, *http.Request, string) *logrus.Entry
-	after  func(*logrus.Entry, *MyResponseWriter, time.Time, string) *logrus.Entry
+	after  func(*logrus.Entry, ResponseWriter, time.Time, string) *logrus.Entry
 }
 
 // NewLogger creates a new AuthMiddleware with the given user session service.
@@ -73,7 +73,7 @@ func DefaultBefore(entry *logrus.Entry, r *http.Request, name string) *logrus.En
 }
 
 // DefaultAfter print log after request
-func DefaultAfter(entry *logrus.Entry, res *MyResponseWriter, start time.Time, name string) *logrus.Entry {
+func DefaultAfter(entry *logrus.Entry, res ResponseWriter, start time.Time, name string) *logrus.Entry {
 	return entry.WithFields(logrus.Fields{
 		"service":     name,
 		"status_code": res.Status(),
