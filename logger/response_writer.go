@@ -10,8 +10,9 @@ type MyResponseWriter struct {
 }
 
 func newMyResponseWriter(res http.ResponseWriter) *MyResponseWriter {
-	// Default the status code to 200
-	return &MyResponseWriter{200, res}
+	return &MyResponseWriter{
+		ResponseWriter: res,
+	}
 }
 
 // Status Give a way to get the status
