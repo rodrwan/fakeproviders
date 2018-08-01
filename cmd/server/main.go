@@ -40,34 +40,31 @@ func main() {
 	cards := make([]*card, 0)
 	// This is where the router is useful, it allows us to declare methods that
 	// this path will be valid for
-	go func() {
-		cards = append(cards, newCard(&user{
-			FirstName: "louane",
-			LastName:  "vidal",
-			Email:     "louane.vidal@example.com",
-		}))
-	}()
-	go func() {
-		cards = append(cards, newCard(&user{
-			FirstName: "noel",
-			LastName:  "peixoto",
-			Email:     "noel.peixoto@example.com",
-		}))
-	}()
-	go func() {
-		cards = append(cards, newCard(&user{
-			FirstName: "manuel",
-			LastName:  "lorenzo",
-			Email:     "manuel.lorenzo@example.com",
-		}))
-	}()
-	go func() {
-		cards = append(cards, newCard(&user{
-			FirstName: "alberto",
-			LastName:  "lozano",
-			Email:     "alberto.lozano@example.com",
-		}))
-	}()
+
+	cards = append(cards, newCard(&user{
+		FirstName: "louane",
+		LastName:  "vidal",
+		Email:     "louane.vidal@example.com",
+	}))
+
+	cards = append(cards, newCard(&user{
+		FirstName: "noel",
+		LastName:  "peixoto",
+		Email:     "noel.peixoto@example.com",
+	}))
+
+	cards = append(cards, newCard(&user{
+		FirstName: "manuel",
+		LastName:  "lorenzo",
+		Email:     "manuel.lorenzo@example.com",
+	}))
+
+	cards = append(cards, newCard(&user{
+		FirstName: "alberto",
+		LastName:  "lozano",
+		Email:     "alberto.lozano@example.com",
+	}))
+
 	cc := &Context{
 		cards: cards,
 	}
