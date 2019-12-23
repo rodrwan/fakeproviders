@@ -11,12 +11,12 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/rodrwan/fakeprovider/logger"
+	"github.com/rodrwan/fakeproviders/logger"
 
 	"github.com/ulule/limiter/drivers/middleware/stdlib"
 
 	"github.com/google/uuid"
-	apierror "github.com/rodrwan/fakeprovider/api-error"
+	apierror "github.com/rodrwan/fakeproviders/api-error"
 	corsLib "github.com/rs/cors"
 	"github.com/ulule/limiter"
 	"github.com/ulule/limiter/drivers/store/memory"
@@ -65,8 +65,23 @@ func main() {
 		Email:     "alberto.lozano@example.com",
 	}))
 
+	cards = append(cards, newCard(&user{
+		FirstName: "lala",
+		LastName:  "lalo",
+		Email:     "lala@example.com",
+	}))
+
+	userUUID := "ff2ecbed-cca9-413b-90b7-e9bd2a8d54c0"
+	cards[4].ID = userUUID
+
 	cc := &Context{
-		cards: cards,
+		cards:            cards,
+		username:         "lala@example.org",
+		password:         "lala1234",
+		sessionSecretKey: []byte("awesome-sess-secret-key"),
+		sessionMaxAge:    60 * 60, // one hour
+		userUUID:         userUUID,
+		AuthKeys:         make(map[string]string),
 	}
 
 	rate := limiter.Rate{
@@ -91,6 +106,11 @@ func main() {
 	r.POST("/cards", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, create})))
 	r.POST("/load", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, loadHandler})))
 	r.PATCH("/cards/:id/info", fakeLogger.Handle(auth.Handle(ContextHandler{cc, patch})))
+
+	r.POST("/login", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, createSession})))
+	r.GET("/api/me", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, me})))
+	r.POST("/api/me/verify", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, verify})))
+	r.POST("/api/me/card", fakeLogger.Handle(rateLimitMid.Handler(ContextHandler{cc, getCard})))
 
 	log.Printf("server running on %s", fmt.Sprintf(":%s", *port))
 
@@ -178,16 +198,19 @@ type user struct {
 }
 
 type card struct {
-	ID          string    `json:"id"`
-	NameOnCard  string    `json:"name_on_card"`
-	PAN         string    `json:"pan"`
-	ReferenceID string    `json:"reference_id"`
-	ExpDate     string    `json:"exp_date"`
-	CVV         string    `json:"cvv"`
-	Balance     int64     `json:"balance"`
-	User        *user     `json:"user"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID          string    `json:"id,omitempty"`
+	NameOnCard  string    `json:"name_on_card,omitempty"`
+	PAN         string    `json:"pan,omitempty"`
+	RealPAN     string    `json:"-"`
+	ReferenceID string    `json:"reference_id,omitempty"`
+	ExpDate     string    `json:"exp_date,omitempty"`
+	RealExpDate string    `json:"-"`
+	CVV         string    `json:"cvv,omitempty"`
+	RealCVV     string    `json:"-"`
+	Balance     int64     `json:"balance,omitempty"`
+	User        *user     `json:"user,omitempty"`
+	CreatedAt   time.Time `json:"created_at,omitempty"`
+	UpdatedAt   time.Time `json:"updated_at,omitempty"`
 }
 
 func (c *card) SetNameOnCard(u *user) {
@@ -195,7 +218,8 @@ func (c *card) SetNameOnCard(u *user) {
 }
 
 func (c *card) SetPAN() {
-	c.PAN = randomStringNumber(16)
+	c.RealPAN = fmt.Sprintf("5432%s", randomStringNumber(12))
+	c.PAN = fmt.Sprintf("XXXX-%s", c.RealPAN[len(c.RealPAN)-4:])
 }
 
 func (c *card) SetReferenceID() {
@@ -205,7 +229,8 @@ func (c *card) SetReferenceID() {
 func (c *card) SetExpDate() {
 	month := pickMonth()
 	year := pickYear()
-	c.ExpDate = fmt.Sprintf("%s/%s", month, year)
+	c.RealExpDate = fmt.Sprintf("%s/%s", month, year)
+	c.ExpDate = "**/**"
 }
 
 func (c *card) SetBalance(balance int64) {

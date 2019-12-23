@@ -3,12 +3,19 @@ package main
 import (
 	"net/http"
 
-	apierror "github.com/rodrwan/fakeprovider/api-error"
+	apierror "github.com/rodrwan/fakeproviders/api-error"
 )
 
 // Context context holds shared data between services and handlers
 type Context struct {
-	cards []*card
+	cards    []*card
+	AuthKeys map[string]string
+
+	username         string
+	password         string
+	userUUID         string
+	sessionSecretKey []byte
+	sessionMaxAge    int
 }
 
 // ContextHandler join context with handler signature
@@ -27,6 +34,14 @@ func (ah ContextHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch resp.Status {
+	case http.StatusBadRequest:
+		data := resp.Data.(string)
+		apierror.NewError(data, http.StatusBadRequest).Write(w)
+
+		return
+	case http.StatusUnauthorized:
+		apierror.NewError("", http.StatusUnauthorized).Write(w)
+		return
 	case http.StatusNotFound:
 		http.NotFound(w, r)
 		return
