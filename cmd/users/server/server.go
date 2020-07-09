@@ -12,7 +12,7 @@ import (
 func Run(port string) {
 	cc := &Context{}
 	// middlewares
-	fakeLogger := logger.NewLogger("fakeprovider")
+	fakeLogger := logger.NewLogger("fakeprovider users")
 
 	r := NewRouter()
 
